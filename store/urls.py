@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import ProductView, CartView, ShopView
+from login.views import LogoutView
 
 app_name = 'store'
 

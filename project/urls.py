@@ -21,5 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('other/', include('other.urls')),
     path('', include('store.urls')),
-    path('login/', include('login.urls'))
+    path('login/', include('login.urls')),
+    # path('logout/', include('logout.urls'))
 ]
