@@ -20,3 +20,19 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
         field_classes = {"username": UsernameField}
 
+
+#  новая часть, чтобы попробовать реализовать текст при использовании для входа несуществующего логина
+# class CustomUserErrorText(UsernameField):
+#     username = UsernameField()
+#
+#     def clean_username(self):
+#         username = self.cleaned_data['username']
+#         if not User.objects.filter(username=username).exist():
+#             raise ValidationError('User name does not exist! \nTry again;)')
+#
+#         return username
+#
+#     class Meta:
+#         model = User
+#         fields = ['username', 'password']
+#         field_classes = {"username": UsernameField}

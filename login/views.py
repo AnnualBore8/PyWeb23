@@ -4,8 +4,9 @@ from django.http import JsonResponse
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm  # , CustomUserErrorText
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 
 class LoginSingleView(View):
@@ -13,7 +14,8 @@ class LoginSingleView(View):
         return render(request, 'login/index.html')
 
     def post(self, request):
-        form = AuthenticationForm(data=request.POST)
+        form = AuthenticationForm(data=request.POST)  #  рабочая версия
+        # form = CustomUserErrorText(data=request.POST)  # новая версия
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -21,7 +23,11 @@ class LoginSingleView(View):
             if user is not None:
                 login(request, user)
                 return redirect('store:shop')
-        return redirect('login:login')
+            else:
+                messages.error('Invalid username or password.')
+        # return redirect('login:login')
+        return render(request, 'login/index.html',
+                      context={'errors': form.errors})
 
 
 class LogoutView(View):
@@ -46,3 +52,15 @@ class CreateAccountView(View):
             login(request, user)
             return redirect('store:shop')
         return render(request, 'login/create_account.html', context={'errors': form.errors})
+
+    # def post(self, request):
+    #     form = AuthenticationForm(data=request.POST)  #  рабочая версия
+    #     # form = CustomUserErrorText(data=request.POST)  # новая версия
+    #     if form.is_valid():
+    #         username = form.cleaned_data.get('username')
+    #         password = form.cleaned_data.get('password')
+    #         user = authenticate(username=username, password=password)
+    #         if user is not None:
+    #             login(request, user)
+    #     return render(request, 'login/index.html',
+    #                   context={'errors': form.errors})

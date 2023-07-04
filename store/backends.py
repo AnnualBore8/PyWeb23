@@ -2,6 +2,8 @@ from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth import get_user_model
 import re
 
+from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 def is_valid_email(email):
     pattern = r'^[\w\.-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)*\.[a-zA-Z]{2,}$'

@@ -11,6 +11,8 @@ from .serializers import CartSerializer
 
 from django.shortcuts import get_object_or_404
 
+from django.shortcuts import redirect
+
 
 class CartViewSet(viewsets.ModelViewSet):
     queryset = Cart.objects.all()
@@ -97,6 +99,14 @@ class ProductView(View):
 class CartView(View):
     def get(self, request):
         return render(request, 'store/cart.html')
+
+
+class WishlistView(View):
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            return render(request, 'store/wishlist.html')
+        return redirect('login:login')
 
 
 
