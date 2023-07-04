@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ProductView, CartView, ShopView, CartViewSet
+from .views import ProductView, CartView, ShopView, CartViewSet, WishlistView
 
 from rest_framework import routers
 
@@ -14,5 +14,6 @@ urlpatterns = [
     path('', ShopView.as_view(), name='shop'),
     path('cart/', CartView.as_view(), name='cart'),
     path('product/<int:id>/', ProductView.as_view(), name='product'),
+    path('wishlist/', WishlistView.as_view(), name='wishlist')
 
 ]
