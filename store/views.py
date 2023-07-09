@@ -4,10 +4,10 @@ from django.views import View
 from django.db.models import OuterRef, Subquery, F, ExpressionWrapper, DecimalField, Case, When
 from django.utils import timezone
 
-from .models import Product, Discount, Cart
+from .models import Product, Discount, Cart, WishList
 from rest_framework import viewsets, response
 from rest_framework.permissions import IsAuthenticated
-from .serializers import CartSerializer
+from .serializers import CartSerializer, WishListSerializer
 
 from django.shortcuts import get_object_or_404
 
@@ -105,8 +105,62 @@ class WishlistView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            return render(request, 'store/wishlist.html')
+            products = WishList.objects.select_related('product').filter(user=self.request.user)
+            return render(request, 'store/wishlist.html', {'data': products})
         return redirect('login:login')
+
+
+class WishListViewSet(viewsets.ModelViewSet):
+    queryset = WishList.objects.all()
+    serializer_class = WishListSerializer
+    permission_classes = (IsAuthenticated, )
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    # надо подумать, что тут делать
+    def create(self, request, *args, **kwargs):
+        wish_list_item = self.get_queryset().filter(product__id =request.data.get('product'))
+        # если продукт существует и уже добавлен, сообщаем пользователю об этом
+        if wish_list_item:
+            return response.Response({'message': 'Product has already added to Wish List'}, status=201)
+        # если такого продукта не существует, выдаем ошибку 404
+        else:
+            product = get_object_or_404(Product, id=request.data.get('product'))
+            # передает продукт, который хотим добавить в виш лист
+            wish_list_item = WishList(user=request.user, product=product)
+            # сохраняем объект в базе данных
+            wish_list_item.save()
+        return response.Response({'message': 'Product has been added to Wish List'}, status=201)
+
+    def destroy(self, request, *args, **kwargs):
+        wish_list_item = self.get_queryset().get(id=kwargs['pk'])
+        wish_list_item.delete()
+        return response.Response({'message': 'Product delete from cart'}, status=201)
+
+
+class AddToWishList(View):
+
+    def get(self, request, id):
+        if request.user.is_authenticated:
+            product_id = id
+            wish_list_item = WishList.objects.filter(user=request.user, product__id=product_id)
+            if wish_list_item:
+                return redirect('store:shop')
+            else:
+                product = get_object_or_404(Product, id=product_id)
+                wish_list_item = WishList(user=request.user, product=product)
+                wish_list_item.save()
+                return redirect('store:shop')
+            return redirect('login:login')
+
+
+class RemoveFromWishList(View):
+    def get(self, request, id):
+        wish_list_item = WishList.objects.filter(user=request.user, product__id=id)
+        wish_list_item.delete()
+        return redirect('store:wishlist')
+
 
 
 
